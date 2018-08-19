@@ -13,51 +13,33 @@ namespace Map
   public class MapGenerator
   {
 
+    
     /// <summary>
-    /// The width of the map, must be an odd integer
+    /// The height and width of the map
     /// </summary>
-    public int MapWidth
+    private Vector2Int _mapSize;
+    public Vector2Int MapSize
     {
       get
       {
-        return _mapWidth;
+        return _mapSize;
       }
+
       set
       {
-        if (value % 2 == 0)
+        if (value.x % 2 == 0)
+        {
           throw new Exception("Width must be an odd number");
+        }
 
-        _mapWidth = value;
+        if (value.y % 2 == 0)
+        {
+          throw new Exception("Height must be an off number");
+        }
+
+        _mapSize = value;
       }
     }
-
-    /// <summary>
-    /// The width of the map
-    /// </summary>
-    private int _mapWidth;
-
-    /// <summary>
-    /// The height of the map, must be an odd integer
-    /// </summary>
-    public int MapHeight
-    {
-      get
-      {
-        return _mapHeight;
-      }
-      set
-      {
-        if (value % 2 == 0)
-          throw new Exception("Height must be an odd number");
-
-        _mapHeight = value;
-      }
-    }
-
-    /// <summary>
-    /// The height of the map
-    /// </summary>
-    private int _mapHeight;
 
     /// <summary>
     /// The inner representation of all the tiles in the map
@@ -79,15 +61,15 @@ namespace Map
 
     #region Map Tuning Parameters
 
-    /// <summary>
-    /// This is the number of times we will attempt to place a room
-    /// in the map. Every time we attemp to place a room, if the room
-    /// overlaps with another room we will not place it. So if this is
-    /// a low number we have a very low density room count in the map.
-    /// But if this is a high number we will attempt to place more rooms
-    /// and therefore result in a higher room density.
-    /// </summary>
-    public int NumberOfRoomPlacementRetries;
+        /// <summary>
+        /// This is the number of times we will attempt to place a room
+        /// in the map. Every time we attemp to place a room, if the room
+        /// overlaps with another room we will not place it. So if this is
+        /// a low number we have a very low density room count in the map.
+        /// But if this is a high number we will attempt to place more rooms
+        /// and therefore result in a higher room density.
+        /// </summary>
+        public int NumberOfRoomPlacementRetries;
 
     /// <summary>
     /// This determines the percentage of time we should force staying
@@ -122,9 +104,14 @@ namespace Map
     /// </summary>
     public float TilesToKeepPercentage = 50;
 
-    #endregion
+        #endregion
 
     #region Region Sizing Parameters
+
+    public bool UsePredefinedRoomSizes = false;
+
+    public List<Vector2Int> PredefinedRoomSizes;
+
     /// <summary>
     /// The max height for any region that is placed in the map
     /// </summary>
@@ -147,10 +134,31 @@ namespace Map
 
     #endregion
 
-    public MapGenerator(int width, int height)
+    public MapGenerator(int width, int height, List<Vector2Int> predefinedRoomSizes = null)
     {
-      MapWidth = width;
-      MapHeight = height;
+      MapSize = new Vector2Int(width, height);
+      SetPredefinedRooms(predefinedRoomSizes);
+    }
+
+    public MapGenerator(Vector2Int mapSize, List<Vector2Int> predefinedRoomSizes = null)
+    {
+      MapSize = mapSize;
+      SetPredefinedRooms(predefinedRoomSizes);
+    }
+
+    private void SetPredefinedRooms(List<Vector2Int> predefinedRoomSizes) {
+
+      foreach (Vector2Int roomSize in predefinedRoomSizes)
+      {
+        if (roomSize.x % 2 == 0 || roomSize.y % 2 == 0)
+        {
+          throw new Exception("Room sizes must be odd");
+        }
+      }
+
+      PredefinedRoomSizes = predefinedRoomSizes;
+
+      UsePredefinedRoomSizes = PredefinedRoomSizes.Count > 0;
     }
 
     /// <summary>
@@ -171,12 +179,12 @@ namespace Map
     private void CreateDefaultTiles()
     {
 
-      Map = new Tile[MapWidth * MapHeight];
+      Map = new Tile[MapSize.x * MapSize.y];
       Regions = new List<Region>();
 
-      for (int y = 0; y < MapHeight; y++)
+      for (int y = 0; y < MapSize.y; y++)
       {
-        for (int x = 0; x < MapWidth; x++)
+        for (int x = 0; x < MapSize.x; x++)
         {
           Map[GetMapIndex(x, y)] = new Tile(x, y);
         }
@@ -192,9 +200,26 @@ namespace Map
     {
       for (int numberOfPlacementAttempts = 0; numberOfPlacementAttempts < NumberOfRoomPlacementRetries; numberOfPlacementAttempts++)
       {
-        Room newRoom = SquareRoom.CreateRandomSizedRoom(MinRegionWidth, MaxRegionWidth, MinRegionHeight, MaxRegionHeight);
+        Room newRoom = UsePredefinedRoomSizes 
+          ? CreateRoomFromPredefinedRoomSizes()
+          : SquareRoom.CreateRandomSizedRoom(MinRegionWidth, MaxRegionWidth, MinRegionHeight, MaxRegionHeight);
+
         PlaceRoomRandomly(newRoom);
       }
+    }
+
+    /// <summary>
+    /// Randomly pick a room from the Predefined room list
+    /// </summary>
+    /// <returns>A definition of one of the predefined room sizes</returns>
+    private Room CreateRoomFromPredefinedRoomSizes()
+    {
+      int index = UnityEngine.Random.Range(0, PredefinedRoomSizes.Count);
+      SquareRoom newRoom = new SquareRoom();
+      Vector2Int roomSize = PredefinedRoomSizes.ElementAt(index);
+      newRoom.Width = roomSize.x;
+      newRoom.Height = roomSize.y;
+      return newRoom;
     }
 
     /// <summary>
@@ -212,8 +237,8 @@ namespace Map
       // this stupidity of math is to get the regions to line up with
       // the maze that gets created in the second step of generation
       Vector2 regionPlacement = new Vector2(
-          UnityEngine.Random.Range(0, ((int)(MapWidth - roomRect.width)) / 2) * 2 + 1,
-          UnityEngine.Random.Range(0, ((int)(MapHeight - roomRect.height)) / 2) * 2 + 1
+          UnityEngine.Random.Range(0, ((int)(MapSize.x - roomRect.width)) / 2) * 2 + 1,
+          UnityEngine.Random.Range(0, ((int)(MapSize.y - roomRect.height)) / 2) * 2 + 1
       );
 
       // first check if we place the bottom left corner of
@@ -306,9 +331,9 @@ namespace Map
     /// </summary>
     private void GeneratePaths()
     {
-      for (int y = 1; y < MapHeight; y += 2)
+      for (int y = 1; y < MapSize.y; y += 2)
       {
-        for (int x = 1; x < MapWidth; x += 2)
+        for (int x = 1; x < MapSize.x; x += 2)
         {
           Tile start = GetTile(x, y);
           if (start.Visited || IsBorderTile(start)) continue;
@@ -619,7 +644,7 @@ namespace Map
     /// <returns>The index for the X,Y coordinate in the Map variable</returns>
     private int GetMapIndex(int x, int y)
     {
-      return (int)(x + MapWidth * y);
+      return (int)(x + MapSize.x * y);
     }
 
     /// <summary>
@@ -630,7 +655,7 @@ namespace Map
     /// <returns>The tile at the coordinates or NULL if the tile doesn't exist</returns>
     public Tile GetTile(int x, int y)
     {
-      if (x < 0 || y < 0 || x >= MapWidth || y >= MapHeight)
+      if (x < 0 || y < 0 || x >= MapSize.x || y >= MapSize.y)
       {
         return null;
       }
