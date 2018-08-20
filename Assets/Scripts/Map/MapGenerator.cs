@@ -52,6 +52,16 @@ namespace Map
     /// </summary>
     private List<Region> Regions;
 
+    public Tile[] GetTiles()
+    {
+      return Map;
+    }
+
+    public List<Region> GetRegions()
+    {
+      return Regions;
+    }
+
     /// <summary>
     /// Holds the last direction chosen by the maze algorithm
     /// This is used along with the KeepSameDirectionPercentage
@@ -186,7 +196,7 @@ namespace Map
       {
         for (int x = 0; x < MapSize.x; x++)
         {
-          Map[GetMapIndex(x, y)] = new Tile(x, y);
+          Map[GetMapIndex(x, y)] = new Tile(x, y, this);
         }
       }
     }
@@ -266,7 +276,7 @@ namespace Map
       }
 
       // go through all the tiles the room overlaps and add them
-      // to the region, and set their neighboring tiles
+      // to the region, and set the bordering tiles to be walls
       Regions.Add(room);
       for (int x = room.X; x < room.X + roomRect.width; x++)
       {
@@ -274,19 +284,7 @@ namespace Map
         {
           Tile tile = GetTile(x, y);
           room.AddTile(tile);
-
-          // now we need to set the tiles neighbors
-          //TODO: There has got to be a better way!
-          Tile north = GetTileToDirection(tile, ETileDirection.NORTH);
-          Tile south = GetTileToDirection(tile, ETileDirection.SOUTH);
-          Tile east = GetTileToDirection(tile, ETileDirection.EAST);
-          Tile west = GetTileToDirection(tile, ETileDirection.WEST);
-          if (room.Overlaps(north)) tile.NorthTile = north;
-          if (room.Overlaps(south)) tile.SouthTile = south;
-          if (room.Overlaps(east)) tile.EastTile = east;
-          if (room.Overlaps(west)) tile.WestTile = west;
-
-          tile.Visited = true;
+          tile.Type = ETileType.ROOMFLOOR;
         }
       }
 
@@ -336,7 +334,7 @@ namespace Map
         for (int x = 1; x < MapSize.x; x += 2)
         {
           Tile start = GetTile(x, y);
-          if (start.Visited || IsBorderTile(start)) continue;
+          if (start.IsFloor() || IsBorderTile(start)) continue;
 
           Stack<Tile> unvisited = new Stack<Tile>();
           unvisited.Push(start);
@@ -349,7 +347,7 @@ namespace Map
           while (unvisited.Count > 0)
           {
             Tile currentTile = unvisited.Peek();
-            currentTile.Visited = true;
+            currentTile.Type = ETileType.FLOOR;
             currentRegion.AddTile(currentTile);
 
             Tile nextTile = CarveTile(currentTile);
@@ -417,11 +415,9 @@ namespace Map
 
       Tile nextTile = GetTileToDirection(currentTile, chosenDirection, 2);
       Tile wall = GetTileToDirection(currentTile, chosenDirection, 1);
-      nextTile.Visited = true;
-      wall.Visited = true;
+      nextTile.Type = ETileType.FLOOR;
+      wall.Type = ETileType.FLOOR;
       currentTile.ParentRegion.AddTile(wall);
-      currentTile.SetTileAtDirection(wall, chosenDirection);
-      wall.SetTileAtDirection(nextTile, chosenDirection);
 
       return nextTile;
     }
@@ -438,7 +434,7 @@ namespace Map
     private bool CanCarve(Tile currentTile, ETileDirection direction)
     {
       Tile tile = GetTileToDirection(currentTile, direction, 2);
-      return tile != null && !tile.Visited && !IsBorderTile(tile, Tile.GetOppositeDirection(direction));
+      return tile != null && !tile.IsFloor() && !IsBorderTile(tile, Tile.GetOppositeDirection(direction));
     }
 
     /// <summary>
@@ -494,7 +490,7 @@ namespace Map
             return true;
           }
 
-          if (!Tile.diagonals.Contains(direction) && tile.Visited)
+          if (!Tile.diagonals.Contains(direction) && tile.IsFloor())
           {
             return true;
           }
@@ -552,6 +548,7 @@ namespace Map
           possibleconnections.RemoveAt(randomConnection);
 
           Tile nextRegion = CarveTile(connection.Value, connection.Key);
+          GetTileToDirection(connection.Value, connection.Key).Type = ETileType.DOOR;
 
           if (i == 0)
           {
@@ -598,7 +595,7 @@ namespace Map
     /// </summary>
     private void KillDeadends()
     {
-      List<Tile> visited = Map.Where(t => t.Visited).ToList();
+      List<Tile> visited = Map.Where(t => t.IsFloor()).ToList();
       int totalTilesToRemove = visited.Count - (int)(visited.Count * (TilesToKeepPercentage / 100));
 
       for (int i = 0; i < totalTilesToRemove; i++)
@@ -611,18 +608,7 @@ namespace Map
           break;
         }
 
-        tile.Visited = false;
-
-        // find the one not null connection
-        if (tile.NorthTile != null) tile.NorthTile.SouthTile = null;
-        if (tile.SouthTile != null) tile.SouthTile.NorthTile = null;
-        if (tile.EastTile != null) tile.EastTile.WestTile = null;
-        if (tile.WestTile != null) tile.WestTile.EastTile = null;
-
-        tile.NorthTile = null;
-        tile.SouthTile = null;
-        tile.EastTile = null;
-        tile.WestTile = null;
+        tile.Type = ETileType.WALL;
 
         if (tile.ParentRegion != null)
         {
@@ -671,7 +657,7 @@ namespace Map
 
     public Tile GetRandomVisitedTile()
     {
-      List<Tile> possibleLocations = Map.Where(t => t.Visited).ToList();
+      List<Tile> possibleLocations = Map.Where(t => t.IsFloor()).ToList();
       int index = UnityEngine.Random.Range(0, possibleLocations.Count);
       return possibleLocations.ElementAt(index);
     }

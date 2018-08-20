@@ -1,8 +1,6 @@
 ﻿using Map.Regions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace Map.Tiles
@@ -14,11 +12,35 @@ namespace Map.Tiles
     public static ETileDirection[] cardinal = new ETileDirection[] { ETileDirection.NORTH, ETileDirection.SOUTH, ETileDirection.EAST, ETileDirection.WEST };
 
     public Vector2 location;
-    public bool Visited;
-    public Tile NorthTile;
-    public Tile SouthTile;
-    public Tile WestTile;
-    public Tile EastTile;
+    public ETileType Type = ETileType.WALL;
+    public Tile NorthTile {
+      get
+      {
+        return ParentMap.GetTile(X, Y + 1);
+      }
+    }
+    public Tile SouthTile {
+      get
+      {
+        return ParentMap.GetTile(X, Y - 1);
+      }
+    }
+
+    public Tile WestTile
+    {
+      get
+      {
+        return ParentMap.GetTile(X - 1, Y);
+      }
+    }
+
+    public Tile EastTile
+    {
+      get
+      {
+        return ParentMap.GetTile(X + 1, Y);
+      }
+    }
 
     public Region ParentRegion;
 
@@ -27,44 +49,48 @@ namespace Map.Tiles
     public int X;
     public int Y;
 
-    public Tile(int x, int y)
+    private MapGenerator ParentMap;
+
+    public Tile(int x, int y, MapGenerator parent)
     {
       this.X = x;
       this.Y = y;
+      this.ParentMap = parent;
+      Type = ETileType.WALL;
     }
 
-    public void SetTileAtDirection(Tile nextTile, ETileDirection direction)
+    public List<Tile> Neighbors
     {
-      switch (direction)
+      get
       {
-        case ETileDirection.NORTH:
-          NorthTile = nextTile;
-          nextTile.SouthTile = this;
-          break;
-        case ETileDirection.SOUTH:
-          SouthTile = nextTile;
-          nextTile.NorthTile = this;
-          break;
-        case ETileDirection.EAST:
-          EastTile = nextTile;
-          nextTile.WestTile = this;
-          break;
-        case ETileDirection.WEST:
-          WestTile = nextTile;
-          nextTile.EastTile = this;
-          break;
+        return new List<Tile>() { NorthTile, SouthTile, EastTile, WestTile};
       }
     }
 
     public bool IsDeadend()
     {
-      int numberOfWalls = 0;
-      numberOfWalls += SouthTile == null ? 1 : 0;
-      numberOfWalls += NorthTile == null ? 1 : 0;
-      numberOfWalls += EastTile == null ? 1 : 0;
-      numberOfWalls += WestTile == null ? 1 : 0;
+      return Neighbors.Where(t => t.IsWall()).Count() == 3;
+    }
 
-      return numberOfWalls == 3;
+    public bool IsCorner()
+    {
+      return (NorthTile.IsWall() || SouthTile.IsWall())
+        && (EastTile.IsWall() || WestTile.IsWall());
+    }
+
+    public bool IsWall()
+    {
+      return Type == ETileType.WALL;
+    }
+
+    public bool IsFloor()
+    {
+      return Type == ETileType.FLOOR || Type == ETileType.ROOMFLOOR;
+    }
+
+    public bool IsRoomFloor()
+    {
+      return Type == ETileType.ROOMFLOOR;
     }
 
     public static ETileDirection GetOppositeDirection(ETileDirection direction)

@@ -8,6 +8,7 @@ using UnityEngine;
 namespace Tiles
 {
   [RequireComponent(typeof(BoxCollider))]
+  [AddComponentMenu("Tiles/Base Tile")]
   public class BaseTile : MonoBehaviour
   {
   }

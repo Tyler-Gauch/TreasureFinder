@@ -1,16 +1,11 @@
 ﻿using Map.Tiles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Rendering
 {
-  class TreasureMapRenderer : MapRenderer
+  [AddComponentMenu("Mapping/Rendering/Treasure Map Renderer")]
+  public class TreasureMapRenderer : CubeMapRenderer
   {
-
     public GameObject Treasure;
 
     protected override void RenderMap()

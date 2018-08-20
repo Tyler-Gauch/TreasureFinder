@@ -1,47 +1,35 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Map.Tiles;
-using System;
 using Map;
-using Map.Regions;
 
 namespace Rendering
 {
-  public class MapRenderer : MonoBehaviour
+  [AddComponentMenu("Mapping/Rendering/Map Renderer")]
+  public abstract class MapRenderer : MonoBehaviour
   {
 
-    public GameObject FloorTile;
-
-    public GameObject WallTile;
-
-    public GameObject CeilingTile;
-
-    public GameObject MarkerTile;
-
-    public Vector2 MaxRegionSize;
-
-    public Vector2 MinRegionSize;
-
-    public GameObject Player;
-
-    public int NumberOfRoomPlacementRetries;
-
-    protected List<GameObject> MapRender;
-
+    [Header("Tuning Parameters")]
     public bool RandomizeParameters = true;
-
-    public List<Vector2Int> PredefinedRoomSizes;
-
-    public MapGenerator Map;
-
-    /// <summary>
-    /// The defined size of all tiles base
-    /// </summary>
     public Vector2 MapSize;
     public float KeepSameDirectionPercentage = 50f;
     public float PossibilityToAddAnotherConnection = 50f;
     public float AdditionalConnectionAttempts = 2;
     public float PercentageOfTilesToKeep = 50;
+
+    [Header("Region Settings")]
+    public Vector2Int MaxRoomSize;
+    public Vector2Int MinRoomSize;
+    public int NumberOfRoomPlacementRetries;
+    public List<Vector2Int> PredefinedRoomSizes;
+
+    [Header("Misc")]
+    public GameObject Player;
+
+    protected List<GameObject> MapRender;
+
+    [HideInInspector]
+    public MapGenerator Map;
 
     private void Awake()
     {
@@ -63,10 +51,10 @@ namespace Rendering
       {
         MapSize.x = (int)(UnityEngine.Random.Range(0, 200) / 2) * 2 + 1;
         MapSize.y = (int)(UnityEngine.Random.Range(0, 200) / 2) * 2 + 1;
-        MinRegionSize.x = (int)(UnityEngine.Random.Range(0, MapSize.x / 5) / 2) * 2 + 1;
-        MinRegionSize.y = (int)(UnityEngine.Random.Range(0, MapSize.y / 5) / 2) * 2 + 1;
-        MaxRegionSize.x = (int)(UnityEngine.Random.Range(MinRegionSize.x + 1, MapSize.x / 2) / 2) * 2 + 1;
-        MaxRegionSize.y = (int)(UnityEngine.Random.Range(MinRegionSize.y + 1, MapSize.x / 2) / 2) * 2 + 1;
+        MinRoomSize.x = (int)(UnityEngine.Random.Range(0, MapSize.x / 5) / 2) * 2 + 1;
+        MinRoomSize.y = (int)(UnityEngine.Random.Range(0, MapSize.y / 5) / 2) * 2 + 1;
+        MaxRoomSize.x = (int)(UnityEngine.Random.Range(MinRoomSize.x + 1, MapSize.x / 2) / 2) * 2 + 1;
+        MaxRoomSize.y = (int)(UnityEngine.Random.Range(MinRoomSize.y + 1, MapSize.x / 2) / 2) * 2 + 1;
         NumberOfRoomPlacementRetries = UnityEngine.Random.Range(0, 1000);
         KeepSameDirectionPercentage = UnityEngine.Random.Range(0, 100);
         PossibilityToAddAnotherConnection = UnityEngine.Random.Range(0, 100);
@@ -75,35 +63,16 @@ namespace Rendering
       }
 
       Map = new MapGenerator((int)MapSize.x, (int)MapSize.y, PredefinedRoomSizes);
-      Map.MaxRegionHeight = (int)MaxRegionSize.y;
-      Map.MaxRegionWidth = (int)MaxRegionSize.x;
-      Map.MinRegionHeight = (int)MinRegionSize.y;
-      Map.MinRegionWidth = (int)MinRegionSize.x;
+      Map.MaxRegionHeight = (int)MaxRoomSize.y;
+      Map.MaxRegionWidth = (int)MaxRoomSize.x;
+      Map.MinRegionHeight = (int)MinRoomSize.y;
+      Map.MinRegionWidth = (int)MinRoomSize.x;
       Map.NumberOfRoomPlacementRetries = NumberOfRoomPlacementRetries;
       Map.KeepSameDirectionPercentage = KeepSameDirectionPercentage;
       Map.AddAnotherConnectionPercentage = PossibilityToAddAnotherConnection;
       Map.AdditionalConnectionAttempts = AdditionalConnectionAttempts;
       Map.TilesToKeepPercentage = PercentageOfTilesToKeep;
-      
-      
     }
-
-    void Update()
-    {
-      if (Input.GetKeyDown(KeyCode.KeypadEnter))
-      {
-        DeleteMap();
-      }
-
-      if (Input.GetKeyUp(KeyCode.KeypadEnter))
-      {
-        SetMapParameters();
-        Map.GenerateMap();
-        RenderMap();
-      }
-    }
-
-
 
     /// <summary>
     /// Converts the map coordinates to screen coordinates
@@ -125,49 +94,13 @@ namespace Rendering
       return screen;
     }
 
-    protected virtual void RenderMap()
-    {
-      for (int x = 0; x < Map.MapSize.x; x++)
-      {
-        for (int y = 0; y < Map.MapSize.y; y++)
-        {
-          Vector3 mapLoc = ConvertMapToScreen(new Vector3(x, 0, y));
-          Tile tile = Map.GetTile(x, y);
-
-          if (tile.Visited)
-          {
-            GameObject floor = Instantiate(FloorTile, mapLoc, Quaternion.identity);
-            floor.layer = 8; // render to minimap
-            MapRender.Add(floor);
-            if (CeilingTile != null)
-            {
-              MapRender.Add(Instantiate(CeilingTile, mapLoc + Vector3.up * 4, Quaternion.identity));
-            }
-          }
-          else
-          {
-            GameObject firstWall = Instantiate(WallTile, mapLoc + Vector3.up, Quaternion.identity);
-            firstWall.layer = 8; // render to minimap
-            MapRender.Add(firstWall);
-          }
-
-          if (tile.DebugMark)
-          {
-            MapRender.Add(Instantiate(MarkerTile, mapLoc, Quaternion.identity));
-          }
-
-          PlacePlayer();
-        }
-      }
-    }
-
     protected virtual void PlacePlayer()
     {
       Tile startTile = Map.GetRandomVisitedTile();
       Player.transform.position = new Vector3(startTile.X, 2, startTile.Y);
     }
 
-    private void DeleteMap()
+    protected void DeleteMap()
     {
       foreach (GameObject tr in MapRender)
       {
@@ -176,5 +109,7 @@ namespace Rendering
 
       MapRender.Clear();
     }
+
+    protected abstract void RenderMap();
   }
 }

@@ -1,16 +1,12 @@
 ﻿using Map.Tiles;
 using Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tiles;
 using UI;
 using UnityEngine;
 
 namespace Items
 {
+  [AddComponentMenu("Items/Treasure Chest")]
   public class Treasure : BaseTile
   {
     public MapRenderer map;

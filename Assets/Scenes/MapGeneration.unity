@@ -140,22 +140,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d09c6c186f12624aa49d085cdac32ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FloorTile: {fileID: 100000, guid: 4620f3c93dca8c94c9124d8ba443f43e, type: 2}
-  WallTile: {fileID: 100000, guid: 93e86b57e56570d46814839867bf9a52, type: 2}
-  CeilingTile: {fileID: 0}
-  MarkerTile: {fileID: 0}
-  MaxRegionSize: {x: 3, y: 3}
-  MinRegionSize: {x: 3, y: 3}
-  Player: {fileID: 0}
-  NumberOfRoomPlacementRetries: 100
   RandomizeParameters: 0
-  PredefinedRoomSizes:
-  - {x: 3, y: 3}
-  MapSize: {x: 15, y: 15}
+  MapSize: {x: 51, y: 51}
   KeepSameDirectionPercentage: 50
   PossibilityToAddAnotherConnection: 50
   AdditionalConnectionAttempts: 2
   PercentageOfTilesToKeep: 50
+  MaxRoomSize: {x: 0, y: 0}
+  MinRoomSize: {x: 0, y: 0}
+  NumberOfRoomPlacementRetries: 100
+  PredefinedRoomSizes:
+  - {x: 3, y: 3}
+  - {x: 5, y: 5}
+  - {x: 3, y: 5}
+  Player: {fileID: 0}
+  Walls: []
+  Floors:
+  - {fileID: 114990293937731762, guid: 7672b2cb73f943d46b69f70f485d2039, type: 2}
+  - {fileID: 114991006386430648, guid: bfdac5f57ddbd25409d2b53005419096, type: 2}
+  - {fileID: 114713037771853356, guid: efa3118f8e03a4449a4c8709cad0d8ec, type: 2}
+  Corners: []
+  Doors: []
 --- !u!4 &140872840
 Transform:
   m_ObjectHideFlags: 0

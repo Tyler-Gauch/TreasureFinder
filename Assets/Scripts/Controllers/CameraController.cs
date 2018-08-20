@@ -15,11 +15,9 @@ namespace Assets.Scripts.Controllers
     public bool invertY = false;
     public bool invertX = false;
     private Vector3 angles;
-    private new Camera camera;
 
     void Start()
     {
-      camera = GetComponent<Camera>();
       Cursor.visible = false;
       angles = transform.localEulerAngles;
     }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI
 {
+  [AddComponentMenu("UI/Menu")]
   public class Menu : MonoBehaviour
   {
     private Text Banner;
@@ -16,12 +12,8 @@ namespace UI
     private Text Score;
     private int CurrentPoints = 0;
 
-    private Canvas canvas;
-
     private void Start()
     {
-      canvas = GetComponent<Canvas>();
-
       Banner = transform.Find("BannerMessage").GetComponent<Text>();
       Info = transform.Find("InfoMessage").GetComponent<Text>();
       Score = transform.Find("Score").GetComponent<Text>();

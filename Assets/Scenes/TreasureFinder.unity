@@ -137,25 +137,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 177332079}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 612b650fcfbcdc748875873f7ba1874f, type: 3}
+  m_Script: {fileID: 11500000, guid: a7ca90b6a0356ac4aabb24ee8cc205a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RandomizeParameters: 0
+  MapSize: {x: 51, y: 51}
+  KeepSameDirectionPercentage: 50
+  PossibilityToAddAnotherConnection: 50
+  AdditionalConnectionAttempts: 2
+  PercentageOfTilesToKeep: 50
+  MaxRoomSize: {x: 15, y: 15}
+  MinRoomSize: {x: 5, y: 5}
+  NumberOfRoomPlacementRetries: 100
+  PredefinedRoomSizes: []
+  Player: {fileID: 1917976572}
   FloorTile: {fileID: 1125468791230406, guid: ce8667839ae69084b9572a360263386c, type: 2}
   WallTile: {fileID: 1762898831255908, guid: b6156760c5dc2b34e980be38e89f9aa6, type: 2}
   CeilingTile: {fileID: 1034314250603864, guid: 8f5db65ea57ba4d4291a3bc815dd2a68,
     type: 2}
   MarkerTile: {fileID: 1746987716322156, guid: 6ee495617fcfe9746a7c4f6c3e4b8cbe, type: 2}
-  MaxRegionSize: {x: 15, y: 15}
-  MinRegionSize: {x: 3, y: 3}
-  Player: {fileID: 1917976572}
-  NumberOfRoomPlacementRetries: 10
-  RandomizeParameters: 0
-  PredefinedRoomSizes: []
-  MapSize: {x: 15, y: 15}
-  KeepSameDirectionPercentage: 50
-  PossibilityToAddAnotherConnection: 50
-  AdditionalConnectionAttempts: 2
-  PercentageOfTilesToKeep: 50
+  Treasure: {fileID: 586980544}
 --- !u!4 &177332081
 Transform:
   m_ObjectHideFlags: 0
