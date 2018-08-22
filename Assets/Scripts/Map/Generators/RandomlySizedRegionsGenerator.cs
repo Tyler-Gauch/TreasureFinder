@@ -1,61 +1,23 @@
 ﻿using Map.Regions;
 using Map.Tiles;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Map
+namespace Map.Generators
 {
   /// <summary>
   /// Generates a map of randomly sized rooms and links them together with hallways
   /// </summary>
-  public class MapGenerator
+  public class RandomlySizedRegionsGenerator : BaseGenerator
   {
-
     
-    /// <summary>
-    /// The height and width of the map
-    /// </summary>
-    private Vector2Int _mapSize;
-    public Vector2Int MapSize
-    {
-      get
-      {
-        return _mapSize;
-      }
-
-      set
-      {
-        if (value.x % 2 == 0)
-        {
-          throw new Exception("Width must be an odd number");
-        }
-
-        if (value.y % 2 == 0)
-        {
-          throw new Exception("Height must be an off number");
-        }
-
-        _mapSize = value;
-      }
-    }
-
-    /// <summary>
-    /// The inner representation of all the tiles in the map
-    /// </summary>
-    private Tile[] Map;
 
     /// <summary>
     /// The inner representation of all the regions in the map.
     /// Used to hold all the rooms that were added to the map
     /// </summary>
     private List<Region> Regions;
-
-    public Tile[] GetTiles()
-    {
-      return Map;
-    }
 
     public List<Region> GetRegions()
     {
@@ -118,10 +80,6 @@ namespace Map
 
     #region Region Sizing Parameters
 
-    public bool UsePredefinedRoomSizes = false;
-
-    public List<Vector2Int> PredefinedRoomSizes;
-
     /// <summary>
     /// The max height for any region that is placed in the map
     /// </summary>
@@ -144,31 +102,14 @@ namespace Map
 
     #endregion
 
-    public MapGenerator(int width, int height, List<Vector2Int> predefinedRoomSizes = null)
+    public RandomlySizedRegionsGenerator(int width, int height)
     {
       MapSize = new Vector2Int(width, height);
-      SetPredefinedRooms(predefinedRoomSizes);
     }
 
-    public MapGenerator(Vector2Int mapSize, List<Vector2Int> predefinedRoomSizes = null)
+    public RandomlySizedRegionsGenerator(Vector2Int mapSize)
     {
       MapSize = mapSize;
-      SetPredefinedRooms(predefinedRoomSizes);
-    }
-
-    private void SetPredefinedRooms(List<Vector2Int> predefinedRoomSizes) {
-
-      foreach (Vector2Int roomSize in predefinedRoomSizes)
-      {
-        if (roomSize.x % 2 == 0 || roomSize.y % 2 == 0)
-        {
-          throw new Exception("Room sizes must be odd");
-        }
-      }
-
-      PredefinedRoomSizes = predefinedRoomSizes;
-
-      UsePredefinedRoomSizes = PredefinedRoomSizes.Count > 0;
     }
 
     /// <summary>
@@ -210,26 +151,11 @@ namespace Map
     {
       for (int numberOfPlacementAttempts = 0; numberOfPlacementAttempts < NumberOfRoomPlacementRetries; numberOfPlacementAttempts++)
       {
-        Room newRoom = UsePredefinedRoomSizes 
-          ? CreateRoomFromPredefinedRoomSizes()
-          : SquareRoom.CreateRandomSizedRoom(MinRegionWidth, MaxRegionWidth, MinRegionHeight, MaxRegionHeight);
+        Room newRoom = null;
+        newRoom = SquareRoom.CreateRandomSizedRoom(MinRegionWidth, MaxRegionWidth, MinRegionHeight, MaxRegionHeight);
 
         PlaceRoomRandomly(newRoom);
       }
-    }
-
-    /// <summary>
-    /// Randomly pick a room from the Predefined room list
-    /// </summary>
-    /// <returns>A definition of one of the predefined room sizes</returns>
-    private Room CreateRoomFromPredefinedRoomSizes()
-    {
-      int index = UnityEngine.Random.Range(0, PredefinedRoomSizes.Count);
-      SquareRoom newRoom = new SquareRoom();
-      Vector2Int roomSize = PredefinedRoomSizes.ElementAt(index);
-      newRoom.Width = roomSize.x;
-      newRoom.Height = roomSize.y;
-      return newRoom;
     }
 
     /// <summary>
@@ -242,14 +168,11 @@ namespace Map
     /// <returns>Whether the room was placed or not</returns>
     private bool PlaceRoomRandomly(Room room)
     {
-      Rect roomRect = room.GetBoundingRect();
+      RectInt roomRect = room.GetBoundingRect();
 
       // this stupidity of math is to get the regions to line up with
       // the maze that gets created in the second step of generation
-      Vector2 regionPlacement = new Vector2(
-          UnityEngine.Random.Range(0, ((int)(MapSize.x - roomRect.width)) / 2) * 2 + 1,
-          UnityEngine.Random.Range(0, ((int)(MapSize.y - roomRect.height)) / 2) * 2 + 1
-      );
+      Vector2Int regionPlacement = GetRandomRegionPlacement((int)roomRect.width, (int)roomRect.height);
 
       // first check if we place the bottom left corner of
       // the region on the selected tile if it will fit
@@ -438,79 +361,6 @@ namespace Map
     }
 
     /// <summary>
-    /// Gets the tile in the direction numberOfTilesAway from the currentTile.
-    /// </summary>
-    /// <param name="currentTile">The current tile we are at</param>
-    /// <param name="direction">The direction we want to go in</param>
-    /// <param name="numberOfTilesAway">How many spaces we want to move</param>
-    /// <returns>The tile we ended at or NULL if no tile exists</returns>
-    private Tile GetTileToDirection(Tile currentTile, ETileDirection direction, int numberOfTilesAway = 1)
-    {
-      switch (direction)
-      {
-        case ETileDirection.NORTH:
-          return GetTile(currentTile.X, currentTile.Y + numberOfTilesAway);
-        case ETileDirection.SOUTH:
-          return GetTile(currentTile.X, currentTile.Y - numberOfTilesAway);
-        case ETileDirection.EAST:
-          return GetTile(currentTile.X + numberOfTilesAway, currentTile.Y);
-        case ETileDirection.WEST:
-          return GetTile(currentTile.X - numberOfTilesAway, currentTile.Y);
-        case ETileDirection.NORTH_EAST:
-          return GetTile(currentTile.X + numberOfTilesAway, currentTile.Y + numberOfTilesAway);
-        case ETileDirection.NORTH_WEST:
-          return GetTile(currentTile.X - numberOfTilesAway, currentTile.Y + numberOfTilesAway);
-        case ETileDirection.SOUTH_EAST:
-          return GetTile(currentTile.X + numberOfTilesAway, currentTile.Y - numberOfTilesAway);
-        case ETileDirection.SOUTH_WEST:
-          return GetTile(currentTile.X - numberOfTilesAway, currentTile.Y - numberOfTilesAway);
-        default:
-          return null;
-      }
-    }
-
-    /// <summary>
-    /// Determines if the currentTile is a border tile to any other tile.
-    /// Border tile is defined as a border to a region, the map, or another visited tile.
-    /// </summary>
-    /// <param name="currentTile">The tile we want to check</param>
-    /// <param name="skipDirection">Allows us to not look in a certain direction.
-    ///     This is so that if we are carving we aren't checking the tile we just came from
-    /// </param>
-    /// <returns>Whether or not the tile is a border tile</returns>
-    private bool IsBorderTile(Tile currentTile, ETileDirection skipDirection = ETileDirection.NONE)
-    {
-      foreach (ETileDirection direction in Enum.GetValues(typeof(ETileDirection)))
-      {
-        if (direction != skipDirection && direction != ETileDirection.NONE)
-        {
-          Tile tile = GetTileToDirection(currentTile, direction);
-          if (CheckIfTileIsOutOfMapOrInRegion(tile))
-          {
-            return true;
-          }
-
-          if (!Tile.diagonals.Contains(direction) && tile.IsFloor())
-          {
-            return true;
-          }
-        }
-      }
-
-      return false;
-    }
-
-    /// <summary>
-    /// Checks if the tile is out of the map or if its a region
-    /// </summary>
-    /// <param name="tile">The tile to check</param>
-    /// <returns>Whether or not its out of the map or in a region</returns>
-    private bool CheckIfTileIsOutOfMapOrInRegion(Tile tile)
-    {
-      return tile == null || tile.ParentRegion != null;
-    }
-
-    /// <summary>
     /// This function deals with adding connections between our regions
     /// we randomly placed, and the maze paths we generated around them.
     /// This works first by looking at all regions we have. Then it picks one
@@ -532,6 +382,7 @@ namespace Map
         if (possibleconnections.Count == 0)
         {
           Debug.Log("Region has no connection points");
+          allRegions.Remove(currentRegion);
           continue;
         }
 
@@ -619,47 +470,6 @@ namespace Map
           Debug.Log("Region less tile?");
         }
       }
-    }
-
-    /// <summary>
-    /// Converts the X,Y coordinates into a
-    /// single index for use with our Map variable
-    /// </summary>
-    /// <param name="x">The x coordinate if our map were multi dimensional</param>
-    /// <param name="y">The y coordinate if our map were multi dimensional</param>
-    /// <returns>The index for the X,Y coordinate in the Map variable</returns>
-    private int GetMapIndex(int x, int y)
-    {
-      return (int)(x + MapSize.x * y);
-    }
-
-    /// <summary>
-    /// Returns a tile from our single dimensional array using Multi dimensional indexes
-    /// </summary>
-    /// <param name="x">The x coordinate of the tile</param>
-    /// <param name="y">The y corrdinate of the tile</param>
-    /// <returns>The tile at the coordinates or NULL if the tile doesn't exist</returns>
-    public Tile GetTile(int x, int y)
-    {
-      if (x < 0 || y < 0 || x >= MapSize.x || y >= MapSize.y)
-      {
-        return null;
-      }
-
-      int index = GetMapIndex(x, y);
-
-      if (index < 0 || index >= Map.Length)
-      {
-        return null;
-      }
-      return Map[index];
-    }
-
-    public Tile GetRandomVisitedTile()
-    {
-      List<Tile> possibleLocations = Map.Where(t => t.IsFloor()).ToList();
-      int index = UnityEngine.Random.Range(0, possibleLocations.Count);
-      return possibleLocations.ElementAt(index);
     }
   }
 }

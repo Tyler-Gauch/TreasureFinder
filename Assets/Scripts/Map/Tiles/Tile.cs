@@ -1,17 +1,27 @@
-﻿using Map.Regions;
+﻿using Map.Generators;
+using Map.Regions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace Map.Tiles
 {
+  /// <summary>
+  /// A tile used by a generator when creating maps
+  /// </summary>
   public class Tile
   {
 
+    /// <summary>
+    /// A list of all the diagonal directions for a tile
+    /// </summary>
     public static ETileDirection[] diagonals = new ETileDirection[] { ETileDirection.NORTH_EAST, ETileDirection.NORTH_WEST, ETileDirection.SOUTH_EAST, ETileDirection.SOUTH_WEST};
+
+    /// <summary>
+    /// a list of all normal cardinal directions for a tile
+    /// </summary>
     public static ETileDirection[] cardinal = new ETileDirection[] { ETileDirection.NORTH, ETileDirection.SOUTH, ETileDirection.EAST, ETileDirection.WEST };
 
-    public Vector2 location;
     public ETileType Type = ETileType.WALL;
     public Tile NorthTile {
       get
@@ -49,9 +59,9 @@ namespace Map.Tiles
     public int X;
     public int Y;
 
-    private MapGenerator ParentMap;
+    private BaseGenerator ParentMap;
 
-    public Tile(int x, int y, MapGenerator parent)
+    public Tile(int x, int y, BaseGenerator parent)
     {
       this.X = x;
       this.Y = y;

@@ -12,28 +12,28 @@ namespace Map.Regions
     public int Height;
     public int Width;
 
-    public Vector2 TopRightCorner
+    public Vector2Int TopRightCorner
     {
       get
       {
-        return new Vector2(
+        return new Vector2Int(
            X + Width,
            Y + Height
         );
       }
     }
 
-    public Vector2 BottomLeftCorner
+    public Vector2Int BottomLeftCorner
     {
       get
       {
-        return new Vector2(X, Y);
+        return new Vector2Int(X, Y);
       }
     }
 
-    public override Rect GetBoundingRect()
+    public override RectInt GetBoundingRect()
     {
-      return new Rect(X, Y, Width, Height);
+      return new RectInt(X, Y, Width, Height);
     }
 
     public static SquareRoom CreateRandomSizedRoom(int MinWidth, int MaxWidth, int MinHeight, int MaxHeight)

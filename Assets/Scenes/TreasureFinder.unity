@@ -146,10 +146,10 @@ MonoBehaviour:
   PossibilityToAddAnotherConnection: 50
   AdditionalConnectionAttempts: 2
   PercentageOfTilesToKeep: 50
-  MaxRoomSize: {x: 15, y: 15}
-  MinRoomSize: {x: 5, y: 5}
+  MaxRoomSize: {x: 5, y: 5}
+  MinRoomSize: {x: 3, y: 3}
   NumberOfRoomPlacementRetries: 100
-  PredefinedRoomSizes: []
+  PredefinedRooms: []
   Player: {fileID: 1917976572}
   FloorTile: {fileID: 1125468791230406, guid: ce8667839ae69084b9572a360263386c, type: 2}
   WallTile: {fileID: 1762898831255908, guid: b6156760c5dc2b34e980be38e89f9aa6, type: 2}

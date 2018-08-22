@@ -2,6 +2,8 @@
 using UnityEngine;
 using Map.Tiles;
 using Map;
+using Map.Regions;
+using Map.Generators;
 
 namespace Rendering
 {
@@ -21,7 +23,7 @@ namespace Rendering
     public Vector2Int MaxRoomSize;
     public Vector2Int MinRoomSize;
     public int NumberOfRoomPlacementRetries;
-    public List<Vector2Int> PredefinedRoomSizes;
+    public List<PredefinedRoom> PredefinedRooms;
 
     [Header("Misc")]
     public GameObject Player;
@@ -29,15 +31,15 @@ namespace Rendering
     protected List<GameObject> MapRender;
 
     [HideInInspector]
-    public MapGenerator Map;
+    public RandomlySizedRegionsGenerator Map;
 
-    private void Awake()
+    public virtual void Awake()
     {
       MapRender = new List<GameObject>();
     }
 
     // Use this for initialization
-    void Start()
+    public virtual void Start()
     {
       SetMapParameters();
       Map.GenerateMap();
@@ -62,7 +64,7 @@ namespace Rendering
         PercentageOfTilesToKeep = UnityEngine.Random.Range(0, 100);
       }
 
-      Map = new MapGenerator((int)MapSize.x, (int)MapSize.y, PredefinedRoomSizes);
+      Map = new RandomlySizedRegionsGenerator((int)MapSize.x, (int)MapSize.y);
       Map.MaxRegionHeight = (int)MaxRoomSize.y;
       Map.MaxRegionWidth = (int)MaxRoomSize.x;
       Map.MinRegionHeight = (int)MinRoomSize.y;

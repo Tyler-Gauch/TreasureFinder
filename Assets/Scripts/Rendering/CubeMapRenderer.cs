@@ -43,6 +43,10 @@ namespace Rendering
             GameObject door = Instantiate(CeilingTile, mapLoc, Quaternion.identity);
             door.layer = 8; // render to minimap
             MapRender.Add(door);
+            if (CeilingTile != null)
+            {
+              MapRender.Add(Instantiate(CeilingTile, mapLoc + Vector3.up * 4, Quaternion.identity));
+            }
           }
 
           if (tile.DebugMark)
