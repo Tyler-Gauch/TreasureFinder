@@ -31,7 +31,7 @@ namespace Rendering
     protected List<GameObject> MapRender;
 
     [HideInInspector]
-    public RandomlySizedRegionsGenerator Map;
+    public BaseGenerator Map;
 
     public virtual void Awake()
     {
@@ -46,7 +46,7 @@ namespace Rendering
       RenderMap();
     }
 
-    private void SetMapParameters()
+    protected virtual void SetMapParameters()
     {
 
       if (RandomizeParameters)
@@ -64,16 +64,17 @@ namespace Rendering
         PercentageOfTilesToKeep = UnityEngine.Random.Range(0, 100);
       }
 
-      Map = new RandomlySizedRegionsGenerator((int)MapSize.x, (int)MapSize.y);
-      Map.MaxRegionHeight = (int)MaxRoomSize.y;
-      Map.MaxRegionWidth = (int)MaxRoomSize.x;
-      Map.MinRegionHeight = (int)MinRoomSize.y;
-      Map.MinRegionWidth = (int)MinRoomSize.x;
-      Map.NumberOfRoomPlacementRetries = NumberOfRoomPlacementRetries;
-      Map.KeepSameDirectionPercentage = KeepSameDirectionPercentage;
-      Map.AddAnotherConnectionPercentage = PossibilityToAddAnotherConnection;
-      Map.AdditionalConnectionAttempts = AdditionalConnectionAttempts;
-      Map.TilesToKeepPercentage = PercentageOfTilesToKeep;
+      Map = new RandomlySizedRegionsGenerator((int)MapSize.x, (int)MapSize.y) {
+          MaxRegionHeight = (int)MaxRoomSize.y,
+          MaxRegionWidth = (int)MaxRoomSize.x,
+          MinRegionHeight = (int)MinRoomSize.y,
+          MinRegionWidth = (int)MinRoomSize.x,
+          NumberOfRoomPlacementRetries = NumberOfRoomPlacementRetries,
+          KeepSameDirectionPercentage = KeepSameDirectionPercentage,
+          AddAnotherConnectionPercentage = PossibilityToAddAnotherConnection,
+          AdditionalConnectionAttempts = AdditionalConnectionAttempts,
+          TilesToKeepPercentage = PercentageOfTilesToKeep
+      };
     }
 
     /// <summary>

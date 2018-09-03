@@ -12,7 +12,7 @@ namespace Map.Generators
   /// Base of all generators, set of help functions that
   /// can be used across multiple generators
   /// </summary>
-  public class BaseGenerator
+  public abstract class BaseGenerator
   {
     #region Attributes
     /// <summary>
@@ -50,6 +50,9 @@ namespace Map.Generators
     #endregion
 
     #region Public API
+
+    public abstract void GenerateMap();
+
     /// <summary>
     /// Allows access to the underlying tile array
     /// </summary>
@@ -91,6 +94,23 @@ namespace Map.Generators
     #endregion
 
     #region Protected API
+
+    /// <summary>
+    /// Sets up the base parameters and creates our empty, unvisted tiles
+    /// </summary>
+    protected virtual void CreateDefaultTiles()
+    {
+
+      Map = new Tile[MapSize.x * MapSize.y];
+
+      for (int y = 0; y < MapSize.y; y++)
+      {
+        for (int x = 0; x < MapSize.x; x++)
+        {
+          Map[GetMapIndex(x, y)] = new Tile(x, y, this);
+        }
+      }
+    }
 
     /// <summary>
     /// Gets the tile in the direction numberOfTilesAway from the currentTile.

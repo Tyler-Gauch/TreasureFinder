@@ -11,7 +11,16 @@ namespace Map.Generators
   /// </summary>
   public class RandomlySizedRegionsGenerator : BaseGenerator
   {
-    
+
+    public RandomlySizedRegionsGenerator(int width, int height)
+    {
+      MapSize = new Vector2Int(width, height);
+    }
+
+    public RandomlySizedRegionsGenerator(Vector2Int mapSize)
+    {
+      MapSize = mapSize;
+    }
 
     /// <summary>
     /// The inner representation of all the regions in the map.
@@ -102,20 +111,10 @@ namespace Map.Generators
 
     #endregion
 
-    public RandomlySizedRegionsGenerator(int width, int height)
-    {
-      MapSize = new Vector2Int(width, height);
-    }
-
-    public RandomlySizedRegionsGenerator(Vector2Int mapSize)
-    {
-      MapSize = mapSize;
-    }
-
     /// <summary>
     /// Procedurally generate a map of connected rooms and pathways
     /// </summary>
-    public void GenerateMap()
+    public override void GenerateMap()
     {
       CreateDefaultTiles();
       PlaceRegions();
@@ -124,22 +123,10 @@ namespace Map.Generators
       KillDeadends();
     }
 
-    /// <summary>
-    /// Sets up the base parameters and creates our empty, unvisted tiles
-    /// </summary>
-    private void CreateDefaultTiles()
+    protected override void CreateDefaultTiles()
     {
-
-      Map = new Tile[MapSize.x * MapSize.y];
+      base.CreateDefaultTiles();
       Regions = new List<Region>();
-
-      for (int y = 0; y < MapSize.y; y++)
-      {
-        for (int x = 0; x < MapSize.x; x++)
-        {
-          Map[GetMapIndex(x, y)] = new Tile(x, y, this);
-        }
-      }
     }
 
     /// <summary>

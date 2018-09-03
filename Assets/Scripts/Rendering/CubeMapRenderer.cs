@@ -1,4 +1,5 @@
-﻿using Map.Tiles;
+﻿using Map.Generators;
+using Map.Tiles;
 using UnityEngine;
 
 namespace Rendering
@@ -6,6 +7,8 @@ namespace Rendering
   [AddComponentMenu("Mapping/Rendering/Cube Map Renderer")]
   public class CubeMapRenderer : MapRenderer
   {
+    public new RandomlySizedRegionsGenerator Map;
+
     public GameObject FloorTile;
 
     public GameObject WallTile;
@@ -20,8 +23,8 @@ namespace Rendering
       {
         for (int y = 0; y < Map.MapSize.y; y++)
         {
-          Vector3 mapLoc = ConvertMapToScreen(new Vector3(x, 0, y));
           Tile tile = Map.GetTile(x, y);
+          Vector3 mapLoc = ConvertMapToScreen(new Vector3(x, tile.Z, y));
 
           if (tile.IsFloor())
           {

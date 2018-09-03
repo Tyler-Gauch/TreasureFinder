@@ -1,4 +1,5 @@
-﻿using Map.Regions;
+﻿using Map.Generators;
+using Map.Regions;
 using Map.Tiles;
 using Rendering.Components;
 using System;
@@ -11,6 +12,8 @@ namespace Rendering
   [AddComponentMenu("Mapping/Rendering/Component Map Renderer")]
   public class ComponentMapRenderer : MapRenderer
   {
+    public new RandomlySizedRegionsGenerator Map;
+
     [Header("Component Types")]
     public List<WallComponent> Walls;
     public List<FloorComponent> Floors;

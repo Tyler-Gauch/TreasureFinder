@@ -58,6 +58,7 @@ namespace Map.Tiles
 
     public int X;
     public int Y;
+    public float Z = 0;
 
     private BaseGenerator ParentMap;
 
